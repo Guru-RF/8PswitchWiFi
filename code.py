@@ -141,20 +141,24 @@ web_app = WSGIApp()
 @web_app.route("/port/<nr>")
 def port_on(request, nr):
     wifi.pixel_status((0,100,100))
-    for number, port in ports.items():
-        port.value = False
-    ports[str(int(nr))].value = True
-    print(purple("Turned port " + str(int(nr)) + " on"))
+    try:
+        for number, port in ports.items():
+            port.value = False
+        ports[str(int(nr))].value = True
+        print(purple("PORT REQ: Turned port " + str(int(nr)) + " on"))
 
-    ports_state = {}
-    for number, port in ports.items():
-        if port.value is True:
-            ports_state[number] = True
-        else:
-            ports_state[number] = False
-    json_object = json.dumps(ports_state)
-    wifi.pixel_status((0,100,0))
-    return ("200 OK", [], json_object)
+        ports_state = {}
+        for number, port in ports.items():
+            if port.value is True:
+                ports_state[number] = True
+            else:
+                ports_state[number] = False
+        json_object = json.dumps(ports_state)
+        wifi.pixel_status((0,100,0))
+        return ("200 OK", [], json_object)
+    except:
+        wifi.pixel_status((0,100,0))
+        return ("400 NOK", [], "Error")
 
 
 @web_app.route("/state")
@@ -165,7 +169,7 @@ def state(request):  # pylint: disable=unused-argument
     for number, port in ports.items():
         if port.value is True:
             ports_state[number] = True
-            print(purple("Active port " + number))
+            print(purple("STATE REQ: Active port " + number))
         else:
             ports_state[number] = False
     json_object = json.dumps(ports_state)
@@ -183,7 +187,6 @@ print(yellow("IP addr: [" + str(esp.pretty_ip(esp.ip_address)) + "]\n"))
 ports[str(int(config.default_port))].value = True
 print(purple("Turned default port " + str(int(config.default_port)) + " on"))
 
-# print(esp.get_time())
 # Start the server
 wsgiServer.start()
 while True:
