@@ -13,6 +13,18 @@ from adafruit_wsgi.wsgi_app import WSGIApp
 import json 
 import config
 
+def purple(data):
+  stamp = datetime.now()
+  return "\x1b[38;5;104m[" + str(stamp) + "] " + data + "\x1b[0m"
+
+
+def yellow(data):
+  return "\x1b[38;5;220m" + data + "\x1b[0m"
+
+def red(data):
+  return "\x1b[1;5;31m -- " + data + "\x1b[0m"
+
+
 # our version
 VERSION = "RF.Guru_8P_Switch 0.1" 
 
@@ -80,7 +92,7 @@ for number, port in ports.items():
     port.value = False
     time.sleep(0.01)
 
-print(f"{config.name} -=- {VERSION}\n")
+print(red(config.name + " -=- " + VERSION))
 
 try:
     from secrets import secrets
@@ -97,9 +109,9 @@ spi = busio.SPI(board.GP18, board.GP19, board.GP16)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
 
 if esp.status == adafruit_esp32spi.WL_IDLE_STATUS:
-      print("ESP32 found and in idle mode")
-print("Firmware vers.", esp.firmware_version)
-print("MAC addr:", [hex(i) for i in esp.MAC_address])
+    print(yellow("\nESP32 found and in idle mode"))
+print(yellow(("Firmware vers." + str(esp.firmware_version))))
+print(yellow("MAC addr: "+ str([hex(i) for i in esp.MAC_address])))
 
 RED_LED = PWMOut.PWMOut(esp, 25)
 GREEN_LED = PWMOut.PWMOut(esp, 26)
@@ -109,11 +121,11 @@ wifi = adafruit_esp32spi_wifimanager.ESPSPI_WiFiManager(esp, secrets, status_lig
 
 
 ## Connect to WiFi
-print("Connecting to WiFi...")
+print(yellow("\nConnecting to WiFi..."))
 wifi.connect()
-print("Connected!")
+print(yellow("Connected!\n"))
   
-print("Connected to", str(esp.ssid, "utf-8"), "\tRSSI:", esp.rssi)
+print(yellow("Connected to [" + str(esp.ssid, "utf-8") + "] RSSI [" + str(esp.rssi) + "]"))
 
 now = None
 while now is None:
@@ -122,10 +134,6 @@ while now is None:
     except OSError:
         pass
 rtc.RTC().datetime = now
-
-# default port
-ports[str(int(config.default_port))].value = True
-print("Turned default port " + str(int(config.default_port)) + " on")
 
 # Web APP
 web_app = WSGIApp()
@@ -136,7 +144,7 @@ def port_on(request, nr):
     for number, port in ports.items():
         port.value = False
     ports[str(int(nr))].value = True
-    print("Turned port " + number + " on")
+    print(purple("Turned port " + str(int(nr)) + " on"))
 
     ports_state = {}
     for number, port in ports.items():
@@ -157,7 +165,7 @@ def state(request):  # pylint: disable=unused-argument
     for number, port in ports.items():
         if port.value is True:
             ports_state[number] = True
-            print("Active port " + number)
+            print(purple("Active port " + number))
         else:
             ports_state[number] = False
     json_object = json.dumps(ports_state)
@@ -169,7 +177,11 @@ def state(request):  # pylint: disable=unused-argument
 server.set_interface(esp)
 wsgiServer = server.WSGIServer(80, application=web_app)
 
-print("IP: ", esp.pretty_ip(esp.ip_address))
+print(yellow("IP addr: [" + str(esp.pretty_ip(esp.ip_address)) + "]\n"))
+
+# default port
+ports[str(int(config.default_port))].value = True
+print(purple("Turned default port " + str(int(config.default_port)) + " on"))
 
 # print(esp.get_time())
 # Start the server
