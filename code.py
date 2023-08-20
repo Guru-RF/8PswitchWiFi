@@ -107,6 +107,7 @@ esp32_reset = DigitalInOut(board.GP13)
 # Clock MOSI(TX) MISO(RX)
 spi = busio.SPI(board.GP18, board.GP19, board.GP16)
 esp = adafruit_esp32spi.ESP_SPIcontrol(spi, esp32_cs, esp32_ready, esp32_reset)
+esp.set_hostname(config.hostname)
 
 if esp.status == adafruit_esp32spi.WL_IDLE_STATUS:
     print(yellow("\nESP32 found and in idle mode"))
