@@ -29,49 +29,49 @@ def red(data):
 VERSION = "RF.Guru_8P_Switch 0.1" 
 
 # ports and self-test
-port1 = DigitalInOut(board.GP0)
+port1 = DigitalInOut(board.GP23)
 port1.direction = Direction.OUTPUT
 port1.value = True
 
 time.sleep(0.01)
 
-port2 = DigitalInOut(board.GP1)
+port2 = DigitalInOut(board.GP22)
 port2.direction = Direction.OUTPUT
 port2.value = True
 
 time.sleep(0.01)
 
-port3 = DigitalInOut(board.GP2)
+port3 = DigitalInOut(board.GP21)
 port3.direction = Direction.OUTPUT
 port3.value = True
 
 time.sleep(0.01)
 
-port4 = DigitalInOut(board.GP3)
+port4 = DigitalInOut(board.GP20)
 port4.direction = Direction.OUTPUT
 port4.value = True
 
 time.sleep(0.01)
 
-port5 = DigitalInOut(board.GP23)
+port5 = DigitalInOut(board.GP0)
 port5.direction = Direction.OUTPUT
 port5.value = True
 
 time.sleep(0.01)
 
-port6 = DigitalInOut(board.GP22)
+port6 = DigitalInOut(board.GP1)
 port6.direction = Direction.OUTPUT
 port6.value = True
 
 time.sleep(0.01)
 
-port7 = DigitalInOut(board.GP21)
+port7 = DigitalInOut(board.GP2)
 port7.direction = Direction.OUTPUT
 port7.value = True
 
 time.sleep(0.01)
 
-port8 = DigitalInOut(board.GP20)
+port8 = DigitalInOut(board.GP3)
 port8.direction = Direction.OUTPUT
 port8.value = True
 
@@ -159,6 +159,9 @@ def port_on(request, nr):
         return ("200 OK", [], json_object)
     except:
         wifi.pixel_status((0,100,0))
+        # default port
+        ports[str(int(config.default_port))].value = True
+        print(purple("Turned default port " + str(int(config.default_port)) + " on"))
         return ("400 NOK", [], "Error")
 
 
@@ -182,7 +185,8 @@ def state(request):  # pylint: disable=unused-argument
 server.set_interface(esp)
 wsgiServer = server.WSGIServer(80, application=web_app)
 
-print(yellow("IP addr: [" + str(esp.pretty_ip(esp.ip_address)) + "]\n"))
+print(yellow("IP addr: [" + str(esp.pretty_ip(esp.ip_address)) + "]\n\n"))
+print(yellow("Send http http://" + str(esp.pretty_ip(esp.ip_address)) + "/port/<portnr> to change ports !\n\n"))
 
 # default port
 ports[str(int(config.default_port))].value = True
