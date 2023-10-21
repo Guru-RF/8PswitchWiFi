@@ -26,7 +26,7 @@ def red(data):
 
 
 # our version
-VERSION = "RF.Guru_8P_Switch 0.1" 
+VERSION = "RF.Guru_8P_Switch_WiFi 0.1" 
 
 # ports and self-test
 port1 = DigitalInOut(board.GP23)
